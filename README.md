@@ -1,6 +1,6 @@
-# E-ATM System v1.0 – Console ATM Simulation in C++
+# E-ATMSystem v1.0 – Console ATM Simulation in C++
 
-**E-ATM System** is a console-based ATM simulator written in C++. It allows users to securely access their account, withdraw or deposit money, and check balances, all via a simple command-line interface.
+**E-ATMSystem** is a console-based ATM simulator written in C++. It allows users to securely access their account, withdraw or deposit money, and check balances, all via a simple command-line interface.
 
 ---
 
