@@ -1,0 +1,27 @@
+========================================
+              ATM RECEIPT               
+========================================
+
+Client Name    : Youness Chergui Amin
+Account Number : AD100
+
+----------------------------------------
+Transaction [1]
+Operation     : Quick Withdraw
+Amount        : 1000.00
+Balance After : 42890.00
+----------------------------------------
+Transaction [2]
+Operation     : Normal Withdraw
+Amount        : 5.00
+Balance After : 42885.00
+----------------------------------------
+Transaction [3]
+Operation     : Deposit
+Amount        : 100.00
+Balance After : 42985.00
+----------------------------------------
+
+========================================
+        Thank you for using E-ATM        
+========================================
