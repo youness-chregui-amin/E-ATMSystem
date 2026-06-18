@@ -127,150 +127,178 @@ AD100#//#1234#//#Youness Chergui Amin#//#0600000000#//#3500
 
 ---
 
-# **Project Structure**
-
-```text
-ATM.cpp
-
-├── Core
-│   ├── Person.h
-│   ├── ATMClient.h
-│   └── Global.h
-│
-├── Screens
-│   ├── Screen.h
-│   ├── LoginScreen.h
-│   ├── ATMMainScreen.h
-│   ├── QuickWithdrawScreen.h
-│   ├── NormalWithdrawScreen.h
-│   ├── DepositScreen.h
-│   └── CheckBalanceScreen.h
-│
-├── Utilities
-│   ├── StringLib.h
-│   ├── DateLib.h
-│   └── InputValidation.h
-│
-├── System
-│   ├── Receipt.h
-│   └── Session.h
-│
-├── Data
-│   ├── Clients.txt
-│   └── Receipt.txt
-│
-└── README.md
-```
-
----
-
 # **System Architecture**
 
-```text
-Login System
-      │
-      ▼
- ATM Main Menu
- ├── Quick Withdraw
- ├── Normal Withdraw
- ├── Deposit
- ├── Check Balance
- └── Logout
-        │
-        ▼
- Session Receipt
-        │
-        ▼
- Receipt.txt
+```mermaid
+flowchart TD
+    Start((Start)) --> Login["Login Screen"]
+
+    Login --> Input["Enter Account Number & PIN"]
+    Input --> Auth{"Valid Login?"}
+
+    Auth -- "No" --> Attempts{"Failed Attempts = 3?"}
+    Attempts -- "No" --> Login
+    Attempts -- "Yes" --> Exit["Exit Application"]
+
+    Auth -- "Yes" --> CurrentClient["Load CurrentClient"]
+    CurrentClient --> Main["ATM Main Menu"]
+
+    Main --> QW["Quick Withdraw"]
+    Main --> NW["Normal Withdraw"]
+    Main --> DP["Deposit"]
+    Main --> CB["Check Balance"]
+    Main --> LO["Logout"]
+
+    QW --> Save1["Update Clients.txt"]
+    NW --> Save2["Update Clients.txt"]
+    DP --> Save3["Update Clients.txt"]
+
+    Save1 --> Session["Add Transaction to Session"]
+    Save2 --> Session
+    Save3 --> Session
+
+    CB --> Main
+    Session --> Main
+
+    LO --> ReceiptChoice{"Save Session Receipt?"}
+    ReceiptChoice -- "Yes" --> Receipt["Generate Receipt.txt"]
+    ReceiptChoice -- "No" --> Clear["Clear Session"]
+
+    Receipt --> Clear
+    Clear --> Reset["Clear CurrentClient"]
+    Reset --> Login
 ```
 
 ---
 
 # **System Diagrams**
 
-## Complete System Architecture
-
-```mermaid
-flowchart TD
-
-    Login["Login Screen"] --> Auth{"Valid Login?"}
-
-    Auth -- No --> Login
-    Auth -- Yes --> Main["ATM Main Menu"]
-
-    Main --> Quick["Quick Withdraw"]
-    Main --> Normal["Normal Withdraw"]
-    Main --> Deposit["Deposit"]
-    Main --> Balance["Check Balance"]
-
-    Quick --> Session["Session Transactions"]
-    Normal --> Session
-    Deposit --> Session
-
-    Session --> Logout["Logout"]
-
-    Logout --> Receipt["Generate Receipt"]
-
-    Receipt --> File["Receipt.txt"]
-
-    Main --> Client["ATMClient"]
-
-    Client --> Clients["Clients.txt"]
-```
-
-## Navigation Flow
-
-```mermaid
-flowchart TD
-
-Start((Start))
-
-Start --> Login
-
-Login --> Check{"Login Success?"}
-
-Check -- No --> Login
-Check -- Yes --> Main
-
-Main --> QuickWithdraw
-Main --> NormalWithdraw
-Main --> Deposit
-Main --> CheckBalance
-Main --> Logout
-
-QuickWithdraw --> Main
-NormalWithdraw --> Main
-Deposit --> Main
-CheckBalance --> Main
-
-Logout --> End((End))
-```
-
-## UML Class Diagram
+## **UML Class Diagram**
 
 ```mermaid
 classDiagram
+    class clsPerson {
+        +Name()
+        +Phone()
+    }
 
-class Person
+    class clsATMClient {
+        +AccountNumber()
+        +PinCode()
+        +AccountBalance()
+        +Find()
+        +Deposit()
+        +Withdraw()
+        +Save()
+        +IsEmpty()
+    }
 
-class ATMClient
-class Screen
-class LoginScreen
-class ATMMainScreen
-class QuickWithdrawScreen
-class NormalWithdrawScreen
-class DepositScreen
-class CheckBalanceScreen
-class Receipt
+    class clsScreen {
+        +_DrawScreenHeader()
+        +_DrawScreenHeaderMain()
+    }
 
-Person <|-- ATMClient
+    class clsLoginScreen {
+        +ShowLoginScreen()
+    }
 
-Screen <|-- LoginScreen
-Screen <|-- ATMMainScreen
-Screen <|-- QuickWithdrawScreen
-Screen <|-- NormalWithdrawScreen
-Screen <|-- DepositScreen
-Screen <|-- CheckBalanceScreen
+    class clsATMMainScreen {
+        +ShowATMMainMenu()
+    }
+
+    class clsQuickWithdrawScreen {
+        +ShowQuickWithdrawScreen()
+    }
+
+    class clsNormalWithdrawScreen {
+        +ShowNormalWithdrawScreen()
+    }
+
+    class clsDepositScreen {
+        +ShowDepositScreen()
+    }
+
+    class clsCheckBalanceScreen {
+        +ShowCheckBalanceScreen()
+    }
+
+    class clsReceipt {
+        +AddTransaction()
+        +SaveReceipt()
+    }
+
+    clsPerson <|-- clsATMClient
+
+    clsScreen <|-- clsLoginScreen
+    clsScreen <|-- clsATMMainScreen
+    clsScreen <|-- clsQuickWithdrawScreen
+    clsScreen <|-- clsNormalWithdrawScreen
+    clsScreen <|-- clsDepositScreen
+    clsScreen <|-- clsCheckBalanceScreen
+```
+
+## **Login Flow**
+
+```mermaid
+flowchart TD
+    A((Start)) --> B["Login Screen"]
+    B --> C["Enter Account Number"]
+    C --> D["Enter PIN Code"]
+    D --> E{"Valid Client?"}
+
+    E -- "Yes" --> F["Open ATM Main Menu"]
+
+    E -- "No" --> G["Increase Failed Attempts"]
+    G --> H{"Attempts = 3?"}
+
+    H -- "No" --> B
+    H -- "Yes" --> I["Exit Application"]
+```
+
+## **ATM Operations Flow**
+
+```mermaid
+flowchart TD
+    Main["ATM Main Menu"] --> QW["Quick Withdraw"]
+    Main --> NW["Normal Withdraw"]
+    Main --> DP["Deposit"]
+    Main --> CB["Check Balance"]
+    Main --> LO["Logout"]
+
+    QW --> W1{"Enough Balance?"}
+    NW --> W2{"Enough Balance?"}
+
+    W1 -- "Yes" --> Update1["Withdraw Amount"]
+    W1 -- "No" --> Main
+
+    W2 -- "Yes" --> Update2["Withdraw Amount"]
+    W2 -- "No" --> Main
+
+    DP --> Update3["Deposit Amount"]
+
+    Update1 --> Save1["Save to Clients.txt"]
+    Update2 --> Save2["Save to Clients.txt"]
+    Update3 --> Save3["Save to Clients.txt"]
+
+    Save1 --> Session["Add to Session Transactions"]
+    Save2 --> Session
+    Save3 --> Session
+
+    Session --> Main
+    CB --> Main
+    LO --> Receipt["Ask for Session Receipt"]
+```
+
+## **File Storage Diagram**
+
+```mermaid
+flowchart LR
+    clsATMClient["clsATMClient"] --> ClientsTxt[("Clients.txt")]
+    clsReceipt["clsReceipt"] --> ReceiptTxt[("Receipt.txt")]
+
+    ClientsTxt --> ClientData["Account Number<br/>PIN Code<br/>Name<br/>Phone<br/>Balance"]
+
+    ReceiptTxt --> ReceiptData["Client Info<br/>Session Transactions<br/>Final Balance"]
 ```
 
 ---
